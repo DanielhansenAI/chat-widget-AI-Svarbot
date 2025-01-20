@@ -1,0 +1,41 @@
+How to save the widget files:
+
+1. Create a new folder called "ai-widget" on your computer
+
+2. Inside the folder, create this structure:
+   ai-widget/
+   ├── widget.js
+   ├── images/
+   │   ├── svarbot-logo.png
+   │   └── chatbutton.png
+   └── index.html
+
+3. Copy the widget.js code from:
+   https://incomparable-froyo-d0582a.netlify.app/widget.js
+
+4. Download the images from:
+   https://incomparable-froyo-d0582a.netlify.app/svarbot-logo.png
+   https://incomparable-froyo-d0582a.netlify.app/chatbutton.png
+
+5. Create a test index.html file with:
+   <!DOCTYPE html>
+   <html>
+   <head>
+     <title>Widget Test</title>
+   </head>
+   <body>
+     <script src="widget.js"></script>
+   </body>
+   </html>
+
+The widget should now work locally when you open index.html in a browser.
+
+Note: Make sure to update the image paths in widget.js to point to your local images folder:
+
+Change:
+${baseUrl}/svarbot-logo.png
+${baseUrl}/chatbutton.png
+
+To:
+images/svarbot-logo.png
+images/chatbutton.png
