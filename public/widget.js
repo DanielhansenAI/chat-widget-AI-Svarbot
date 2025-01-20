@@ -12,6 +12,30 @@
   
   const baseUrl = scriptElement.src.substring(0, scriptElement.src.lastIndexOf('/'));
   
+  // Chat history management
+  const CHAT_HISTORY_KEY = 'ai_widget_chat_history';
+  const MAX_HISTORY_MESSAGES = 10;
+
+  function loadChatHistory() {
+    try {
+      const history = localStorage.getItem(CHAT_HISTORY_KEY);
+      return history ? JSON.parse(history) : [];
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+      return [];
+    }
+  }
+
+  function saveChatHistory(messages) {
+    try {
+      // Keep only the last MAX_HISTORY_MESSAGES
+      const historyToSave = messages.slice(-MAX_HISTORY_MESSAGES);
+      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(historyToSave));
+    } catch (error) {
+      console.error('Error saving chat history:', error);
+    }
+  }
+
   // Create styles
   const styles = document.createElement('style');
   styles.textContent = `
@@ -234,7 +258,7 @@
       position: fixed !important;
       bottom: 20px !important;
       right: 20px !important;
-      z-index: 999999 !important;
+      z-index: 999998 !important;
       width: 56px !important;
       height: 56px !important;
       border-radius: 28px !important;
@@ -312,6 +336,10 @@
   const sendButton = container.querySelector('.ai-widget-send');
   const closeButton = container.querySelector('.ai-widget-close');
 
+  // Load chat history
+  const chatHistory = loadChatHistory();
+  chatHistory.forEach(message => addMessage(message.text, message.isUser));
+
   function addMessage(text, isUser = false) {
     const message = document.createElement('div');
     message.className = `ai-widget-message ${isUser ? 'user' : ''}`;
@@ -326,6 +354,10 @@
     `;
     messagesContainer.appendChild(message);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    // Save to chat history
+    chatHistory.push({ text, isUser, timestamp: new Date().toISOString() });
+    saveChatHistory(chatHistory);
   }
 
   function showTyping() {
@@ -373,7 +405,10 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ 
+          message,
+          context: chatHistory.slice(-3) // Send last 3 messages for context
+        })
       });
 
       const data = await response.json();
@@ -430,6 +465,8 @@
 
   // Add welcome message
   setTimeout(() => {
-    addMessage("👋 Hi there! How can I help you today?");
+    if (chatHistory.length === 0) {
+      addMessage("👋 Hi there! How can I help you today?");
+    }
   }, 500);
 })();
