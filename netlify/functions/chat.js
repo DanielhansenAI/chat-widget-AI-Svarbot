@@ -1,43 +1,47 @@
-import OpenAI from 'openai';
+const { OpenAI } = require('openai');
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Knowledge Base
-const knowledgeBase = {
-  product_info: `
- Company Name: KBHCaps.
- Company information: Selling digigal clothing accesories.
-Products: Los Angeles caps, trucker caps, glasses, and sunglasses.
-Quality & Pricing: High quality, affordable, and budget-friendly.
-Location: Based in Copenhagen, Denmark. No physical store, only online sales.
-Ownership:
-Owner: Daniel (16 years old).
-Co-owners: Don (16) and Bereket (16).
-Social Media Presence:
-Popular on TikTok and Instagram.
-TikTok: 1500+ followers, 300,000+ views.
-Core Values: Affordable style, accessible quality, strong online community.
-    
-    Contact:
-    - Email: support@kbhcaps.dk
-  `
-};
-
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+exports.handler = async (event, context) => {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   }
+
+  // Handle CORS preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: 'ok'
+    }
+  }
+
+  // Knowledge Base
+  const knowledgeBase = {
+    product_info: `
+   Company Name: KBHCaps.
+   Company information: Selling digigal clothing accesories.
+  Products: Los Angeles caps, trucker caps, glasses, and sunglasses.
+  Quality & Pricing: High quality, affordable, and budget-friendly.
+  Location: Based in Copenhagen, Denmark. No physical store, only online sales.
+  Ownership:
+  Owner: Daniel (16 years old).
+  Co-owners: Don (16) and Bereket (16).
+  Social Media Presence:
+  Popular on TikTok and Instagram.
+  TikTok: 1500+ followers, 300,000+ views.
+  Core Values: Affordable style, accessible quality, strong online community.
+      
+      Contact:
+      - Email: support@kbhcaps.dk
+    `
+  };
 
   try {
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
-    })
+    });
 
-    const { message } = await req.json()
+    const { message } = JSON.parse(event.body);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -81,23 +85,20 @@ Assistant: "Our caps are designed to be budget-friendly while maintaining high q
       temperature: 0.0
     });
 
-    const response = completion.choices[0].message.content
-
-    return new Response(
-      JSON.stringify({ response }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
-    )
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        response: completion.choices[0].message.content
+      })
+    };
 
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
-      }
-    )
+    console.error('Chat function error:', error);
+    return {
+      statusCode: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: error.message || 'Internal server error' })
+    };
   }
-})
+};
