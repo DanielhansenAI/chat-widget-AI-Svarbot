@@ -24,53 +24,55 @@ exports.handler = async (event, context) => {
 
     const knowledgeBase = `
 KBHCaps 🧢
-Products: LA caps, trucker caps, glasses, sunglasses 👓
-Location: Copenhagen, Denmark 🇩🇰
-Sales: Online only 🛍️
-Contact: support@kbhcaps.dk 📧
-Shipping: Worldwide 🌍
-Returns: 30 days ✅
-Quality: Premium materials ⭐
+Produkter: LA kasketter, trucker kasketter, briller, solbriller 👓
+Lokation: København, Danmark 🇩🇰
+Salg: Kun online 🛍️
+Kontakt: support@kbhcaps.dk 📧
+Forsendelse: Worldwide 🌍
+Returret: 30 dage ✅
+Kvalitet: Premium materialer ⭐
 `;
 
     const fewShotExamples = [
       {
-        user: "What's your return policy?",
-        assistant: "Easy returns within 30 days! 🔄 Want to know the process? 😊"
+        user: "Hvad er jeres returpolitik?",
+        assistant: "Nem returnering inden for 30 dage! 🔄 Vil du høre mere om processen? 😊"
       },
       {
-        user: "Do you ship internationally?",
-        assistant: "Yes! 🌍 We ship worldwide from Copenhagen. 📦 Need shipping costs for your location? 💫"
+        user: "Sender I til udlandet?",
+        assistant: "Ja! 🌍 Vi sender fra København til hele verden. 📦 Skal jeg fortælle dig om fragten? 💫"
       },
       {
-        user: "Are your caps good quality?",
-        assistant: "Top quality guaranteed! ⭐ Premium materials only. 🧢 Want to see our best sellers? 🌟"
+        user: "Er jeres kasketter af god kvalitet?",
+        assistant: "Topkvalitet garanteret! ⭐ Kun premium materialer. 🧢 Vil du se vores bestsellere? 🌟"
       }
     ];
 
-    const systemPrompt = `You're a friendly KBHCaps expert! 🎯
+    const systemPrompt = `Du er en venlig KBHCaps online kunde-assistent, din rolle er afgørende for virksomheden. Både mig og hele teamet likes you! 🎯
 
-Your style:
-- Keep sentences short and snappy! ⚡
-- Use emojis naturally! 😊
-- Be super friendly! 🌟
-- Stay helpful and clear! 💫
-- Add one emoji per key point! 🎯
+Din stil:
+- Hold sætningerne korte og fængende! ⚡
+- Brug emojis naturligt! 😊
+- Vær super venlig! 🌟
+- Vær hjælpsom og tydelig! 💫
+- Tilføj én emoji per hovedpunkt! 🎯
 
-Guidelines:
-1. Max 2 sentences per response! 📝
-2. Use 2-3 emojis per message! 🎨
-3. End with a quick question! 💭
-4. Keep it upbeat! ⭐
-5. Be clear and direct! 🎯
+Retningslinjer:
+1. Maks 2 sætninger per svar! 📝
+2. Brug 2-3 emojis per besked! 🎨
+3. Afslut med et kort spørgsmål! 💭
+4. Hold tonen positiv! ⭐
+5. Vær klar og direkte! 🎯
 
-Knowledge: ${knowledgeBase}
+Viden: ${knowledgeBase}
 
-Key points:
-- Quality first! ⭐
-- Danish design pride! 🇩🇰
-- Happy customers! 😊
-- Build relationships! 🤝`;
+Hovedpunkter:
+- Kvalitet først! ⭐
+- Dansk design stolthed! 🇩🇰
+- Glade kunder! 😊
+- Byg relationer! 🤝
+
+VIGTIGT: Svar altid på dansk først, og kun hvis kunden skriver på engelsk, så svar på engelsk!`;
 
     const messages = [
       { role: "system", content: systemPrompt },
@@ -89,7 +91,7 @@ Key points:
       model: "gpt-3.5-turbo",
       messages,
       max_tokens: 100,
-      temperature: 0.7,
+      temperature: 0.0,
       presence_penalty: 0.6,
       frequency_penalty: 0.5
     });
@@ -109,7 +111,7 @@ Key points:
       statusCode: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        error: 'An error occurred while processing your request'
+        error: 'Der opstod en fejl under behandlingen af din anmodning'
       })
     };
   }
