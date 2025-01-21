@@ -5,6 +5,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Knowledge Base
+const knowledgeBase = {
+  product_info: `
+ Company Name: KBHCaps.
+ Company information: Selling digigal clothing accesories.
+Products: Los Angeles caps, trucker caps, glasses, and sunglasses.
+Quality & Pricing: High quality, affordable, and budget-friendly.
+Location: Based in Copenhagen, Denmark. No physical store, only online sales.
+Ownership:
+Owner: Daniel (16 years old).
+Co-owners: Don (16) and Bereket (16).
+Social Media Presence:
+Popular on TikTok and Instagram.
+TikTok: 1500+ followers, 300,000+ views.
+Core Values: Affordable style, accessible quality, strong online community.
+    
+    Contact:
+    - Email: support@kbhcaps.dk
+  `
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -25,6 +46,7 @@ serve(async (req) => {
           role: "system",
           content: `You are a highly qualified, helpful and experienced online customer support assistant. Be friendly, professional, humouristic and concise. Your role is vital for the whole company. Both me, and the whole team greatly values you.
 
+Dont use information outside this data i provided with the prompt.
 Here is the knowledge base with product information, use this to inform your responses:
 
 ${knowledgeBase.product_info}
