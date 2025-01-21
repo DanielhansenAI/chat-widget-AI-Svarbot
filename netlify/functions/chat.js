@@ -74,7 +74,7 @@ Guidelines for responses:
         }
       ],
       max_tokens: 500,
-      temperature: 0.7
+      temperature: 0.0
     });
 
     return {
