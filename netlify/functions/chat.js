@@ -3,16 +3,17 @@ const { OpenAI } = require('openai');
 exports.handler = async (event, context) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  }
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  };
 
   // Handle CORS preflight requests
   if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 200,
+      statusCode: 204,
       headers: corsHeaders,
-      body: 'ok'
-    }
+      body: ''
+    };
   }
 
   try {
@@ -35,14 +36,20 @@ exports.handler = async (event, context) => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful customer support assistant. Be friendly and concise."
+          content: `You are a helpful customer support assistant for KBHCaps. Be friendly and concise.
+          
+Company information: KBHCaps sells digital clothing accessories including Los Angeles caps, trucker caps, glasses, and sunglasses.
+Products: High quality, affordable caps and glasses.
+Location: Based in Copenhagen, Denmark. Online sales only.
+Contact: support@kbhcaps.dk`
         },
         {
           role: "user",
           content: message
         }
       ],
-      max_tokens: 150
+      max_tokens: 150,
+      temperature: 0.7
     });
 
     return {
@@ -55,10 +62,13 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('Chat function error:', error);
+    
     return {
       statusCode: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: error.message || 'Internal server error' })
+      body: JSON.stringify({ 
+        error: 'An error occurred while processing your request'
+      })
     };
   }
 };
