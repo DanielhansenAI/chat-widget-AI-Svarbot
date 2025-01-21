@@ -66,7 +66,8 @@ Guidelines for responses:
 1. Always be accurate and use information from the knowledge base
 2. If you're not sure about something, say so rather than making assumptions
 3. Keep responses friendly but professional
-4. If users need additional support, direct them to support@example.com`
+4. Make use of emojies, to display feelings and make the dialog more dynamic.
+5. If users need additional support, direct them to support@example.com`
         },
         {
           role: "user",
