@@ -93,6 +93,16 @@
       font-weight: 600 !important;
     }
 
+    .ai-widget-avatar {
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+    }
+
     .ai-widget-controls {
       display: flex !important;
       gap: 8px !important;
@@ -117,6 +127,73 @@
 
     .ai-widget-button:hover {
       background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .ai-widget-settings-panel {
+      position: absolute !important;
+      top: 64px !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      background: white !important;
+      z-index: 3 !important;
+      display: none !important;
+      flex-direction: column !important;
+      padding: 24px !important;
+    }
+
+    .ai-widget-settings-panel.visible {
+      display: flex !important;
+    }
+
+    .ai-widget-settings-button {
+      background: none !important;
+      border: none !important;
+      padding: 16px !important;
+      width: 100% !important;
+      text-align: left !important;
+      cursor: pointer !important;
+      border-radius: 12px !important;
+      color: #1f2937 !important;
+      transition: all 0.2s !important;
+      font-size: 16px !important;
+      margin-bottom: 8px !important;
+    }
+
+    .ai-widget-settings-button:hover {
+      background: #f3f4f6 !important;
+      transform: translateX(4px) !important;
+    }
+
+    .ai-widget-settings-button.back {
+      background: #2563eb !important;
+      color: white !important;
+      font-weight: 600 !important;
+      margin-top: auto !important;
+      margin-bottom: 16px !important;
+    }
+
+    .ai-widget-settings-button.back:hover {
+      background: #1d4ed8 !important;
+    }
+
+    .ai-widget-settings-footer {
+      text-align: center !important;
+      padding-top: 16px !important;
+      border-top: 1px solid #e5e7eb !important;
+    }
+
+    .ai-widget-settings-footer a {
+      color: #2563eb !important;
+      text-decoration: none !important;
+      font-size: 14px !important;
+      opacity: 0.8 !important;
+      transition: opacity 0.2s !important;
+    }
+
+    .ai-widget-settings-footer a:hover {
+      opacity: 1 !important;
+      text-decoration: underline !important;
     }
 
     .ai-widget-messages {
@@ -278,6 +355,65 @@
       transform: scale(1.1) !important;
       box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4) !important;
     }
+
+    .ai-widget-toggle.open {
+      transform: scale(0.77) !important;
+    }
+
+    .ai-widget-toggle img {
+      width: 58.4% !important;
+      height: 58.4% !important;
+      object-fit: contain !important;
+    }
+
+    .ai-widget-toggle.open img {
+      width: 77% !important;
+      height: 77% !important;
+    }
+
+    .ai-widget-settings-confirm {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      background: white !important;
+      padding: 24px !important;
+      display: none !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+
+    .ai-widget-confirm-message {
+      font-size: 16px !important;
+      color: #1f2937 !important;
+      margin-bottom: 24px !important;
+    }
+
+    .ai-widget-confirm-buttons {
+      display: flex !important;
+      gap: 16px !important;
+      width: 100% !important;
+    }
+
+    .ai-widget-confirm-buttons button {
+      flex: 1 !important;
+    }
+
+    .confirm-yes {
+      background: #ef4444 !important;
+      color: white !important;
+    }
+
+    .confirm-yes:hover {
+      background: #dc2626 !important;
+    }
+
+    .confirm-no {
+      margin-top: 0 !important;
+    }
   `;
   document.head.appendChild(styles);
 
@@ -290,7 +426,7 @@
     <div class="ai-widget-header">
       <div class="ai-widget-title">
         <div class="ai-widget-avatar">
-          <img src="${baseUrl}/svarbot-logo.png" alt="AI Support" style="width: 80% !important; height: 80% !important;" />
+          <img src="${baseUrl}/svarbot-logo.png" alt="KBHbot" style="width: 100% !important; height: 100% !important;" />
         </div>
         <span>KBHbot</span>
       </div>
@@ -313,12 +449,30 @@
         </button>
       </div>
     </div>
+    <div class="ai-widget-settings-panel">
+      <div class="ai-widget-settings-content">
+        <button class="ai-widget-settings-button" data-action="restart">Start forfra</button>
+        <button class="ai-widget-settings-button" data-action="save">Gem chatlog</button>
+        <button class="ai-widget-settings-button" data-action="clear">Slet chatlog</button>
+        <button class="ai-widget-settings-button back" data-action="back">Gå tilbage til chatten</button>
+        <div class="ai-widget-settings-footer">
+          <a href="https://svarbot.dk" target="_blank" rel="noopener noreferrer">Drevet af svarbot.dk</a>
+        </div>
+      </div>
+      <div class="ai-widget-settings-confirm" style="display: none;">
+        <p class="ai-widget-confirm-message"></p>
+        <div class="ai-widget-confirm-buttons">
+          <button class="ai-widget-settings-button confirm-yes">Ja</button>
+          <button class="ai-widget-settings-button back confirm-no">Nej</button>
+        </div>
+      </div>
+    </div>
     <div class="ai-widget-messages"></div>
     <div class="ai-widget-input">
       <form class="ai-widget-form">
         <textarea
           class="ai-widget-textarea"
-          placeholder="Type your message..."
+          placeholder="Stil mig et spørgsmål..."
           rows="1"
         ></textarea>
         <button type="submit" class="ai-widget-send" disabled>
@@ -337,7 +491,7 @@
   button.className = 'ai-widget-toggle';
   button.innerHTML = `
     <div style="display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; height: 100% !important;">
-      <img src="${baseUrl}/chatbutton.png" alt="Chat" style="width: 80% !important; height: 80% !important; object-fit: contain !important;" />
+      <img src="${baseUrl}/chatbutton.png" alt="Chat" style="width: 58.4% !important; height: 58.4% !important; object-fit: contain !important;" />
     </div>
   `;
 
@@ -349,12 +503,16 @@
   const closeButton = container.querySelector('.ai-widget-close');
   const minimizeButton = container.querySelector('.ai-widget-minimize');
   const settingsButton = container.querySelector('.ai-widget-settings');
+  const settingsPanel = container.querySelector('.ai-widget-settings-panel');
+  const settingsButtons = container.querySelectorAll('.ai-widget-settings-button');
 
   let isMinimized = false;
+  let isSettingsOpen = false;
+  let chatHistoryBackup = null;
 
   // Format timestamp
   function formatMessageTime(timestamp, prevTimestamp) {
-    if (!prevTimestamp || Math.abs(timestamp - prevTimestamp) >= 60000) {
+    if (!prevTimestamp || Math.abs(new Date(timestamp).getTime() - new Date(prevTimestamp).getTime()) >= 60000) {
       return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     return null;
@@ -362,11 +520,13 @@
 
   // Load chat history
   const chatHistory = loadChatHistory();
-  chatHistory.forEach(message => addMessage(message.text, message.isUser, new Date(message.timestamp)));
+  chatHistory.forEach((message, index) => {
+    const prevMessage = index > 0 ? chatHistory[index - 1] : null;
+    addMessage(message.text, message.isUser, message.timestamp, prevMessage?.timestamp);
+  });
 
-  function addMessage(text, isUser = false, timestamp = new Date()) {
-    const prevMessage = chatHistory[chatHistory.length - 1];
-    const timeString = formatMessageTime(timestamp, prevMessage?.timestamp);
+  function addMessage(text, isUser = false, timestamp = new Date().toISOString(), prevTimestamp = null) {
+    const timeString = formatMessageTime(timestamp, prevTimestamp);
 
     if (timeString) {
       const timeDiv = document.createElement('div');
@@ -384,7 +544,7 @@
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     // Save to chat history
-    chatHistory.push({ text, isUser, timestamp: timestamp.toISOString() });
+    chatHistory.push({ text, isUser, timestamp });
     saveChatHistory(chatHistory);
   }
 
@@ -405,50 +565,84 @@
     return typing;
   }
 
-  // Event listeners
-  textarea.addEventListener('input', () => {
-    sendButton.disabled = !textarea.value.trim();
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-  });
+  // Settings functionality
+  const settingsContent = container.querySelector('.ai-widget-settings-content');
+  const confirmPanel = container.querySelector('.ai-widget-settings-confirm');
+  const confirmMessage = container.querySelector('.ai-widget-confirm-message');
+  const confirmYes = container.querySelector('.confirm-yes');
+  const confirmNo = container.querySelector('.confirm-no');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const message = textarea.value.trim();
-    if (!message) return;
+  function showConfirmation(message, onConfirm) {
+    confirmMessage.textContent = message;
+    settingsContent.style.display = 'none';
+    confirmPanel.style.display = 'flex';
 
-    addMessage(message, true);
-    textarea.value = '';
-    textarea.style.height = '44px';
-    sendButton.disabled = true;
+    const handleYes = () => {
+      onConfirm();
+      hideConfirmation();
+    };
 
-    const typing = showTyping();
+    const handleNo = () => {
+      hideConfirmation();
+    };
 
-    try {
-      const response = await fetch('https://incomparable-froyo-d0582a.netlify.app/.netlify/functions/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          message,
-          context: chatHistory.slice(-3) // Send last 3 messages for context
-        })
-      });
+    const cleanup = () => {
+      confirmYes.removeEventListener('click', handleYes);
+      confirmNo.removeEventListener('click', handleNo);
+    };
 
-      const data = await response.json();
+    confirmYes.addEventListener('click', handleYes);
+    confirmNo.addEventListener('click', handleNo);
+  }
+
+  function hideConfirmation() {
+    confirmPanel.style.display = 'none';
+    settingsContent.style.display = 'block';
+  }
+
+  settingsButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const action = button.dataset.action;
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response');
+      if (action === 'back') {
+        settingsPanel.classList.remove('visible');
+        isSettingsOpen = false;
+        return;
       }
 
-      typing.remove();
-      addMessage(data.response);
-    } catch (error) {
-      typing.remove();
-      addMessage("I'm sorry, I'm having trouble connecting right now. Please try again later.");
-      console.error('Chat error:', error);
-    }
+      switch (action) {
+        case 'restart':
+          showConfirmation('Er du sikker på, at du vil starte forfra?', () => {
+            chatHistory.length = 0;
+            saveChatHistory(chatHistory);
+            messagesContainer.innerHTML = '';
+            addMessage("👋 Hej! Hvordan kan jeg hjælpe dig i dag?");
+            settingsPanel.classList.remove('visible');
+            isSettingsOpen = false;
+          });
+          break;
+        case 'save':
+          const blob = new Blob([JSON.stringify(chatHistory, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'chat-history.json';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          break;
+        case 'clear':
+          showConfirmation('Er du sikker på, at du vil slette hele chatloggen?', () => {
+            chatHistory.length = 0;
+            saveChatHistory(chatHistory);
+            messagesContainer.innerHTML = '';
+            settingsPanel.classList.remove('visible');
+            isSettingsOpen = false;
+          });
+          break;
+      }
+    });
   });
 
   // Add keydown event listener for Enter key
@@ -476,6 +670,7 @@
 
   function updateToggleButton() {
     if (container.classList.contains('visible')) {
+      button.classList.add('open');
       button.innerHTML = `
         <div style="display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; height: 100% !important;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white">
@@ -484,9 +679,10 @@
         </div>
       `;
     } else {
+      button.classList.remove('open');
       button.innerHTML = `
         <div style="display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; height: 100% !important;">
-          <img src="${baseUrl}/chatbutton.png" alt="Chat" style="width: 80% !important; height: 80% !important; object-fit: contain !important;" />
+          <img src="${baseUrl}/chatbutton.png" alt="Chat" style="width: 58.4% !important; height: 58.4% !important; object-fit: contain !important;" />
         </div>
       `;
     }
@@ -505,8 +701,8 @@
   });
 
   settingsButton.addEventListener('click', () => {
-    // Settings functionality can be added here
-    console.log('Settings clicked');
+    isSettingsOpen = !isSettingsOpen;
+    settingsPanel.classList.toggle('visible');
   });
 
   // Add button to page
@@ -515,7 +711,7 @@
   // Add welcome message
   setTimeout(() => {
     if (chatHistory.length === 0) {
-      addMessage("👋 Hi there! How can I help you today?");
+      addMessage("👋 Hej! Hvordan kan jeg hjælpe dig i dag?");
     }
   }, 500);
 })();
