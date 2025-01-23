@@ -93,7 +93,12 @@
       font-weight: 600 !important;
     }
 
-    .ai-widget-close {
+    .ai-widget-controls {
+      display: flex !important;
+      gap: 8px !important;
+    }
+
+    .ai-widget-button {
       background: none !important;
       border: none !important;
       color: white !important;
@@ -108,10 +113,9 @@
       z-index: 2 !important;
       width: 32px !important;
       height: 32px !important;
-      margin-left: auto !important;
     }
 
-    .ai-widget-close:hover {
+    .ai-widget-button:hover {
       background: rgba(255, 255, 255, 0.1) !important;
     }
 
@@ -137,18 +141,6 @@
       flex-direction: row-reverse !important;
     }
 
-    .ai-widget-avatar {
-      width: 32px !important;
-      height: 32px !important;
-      border-radius: 50% !important;
-      background: #2563eb !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      color: white !important;
-      flex-shrink: 0 !important;
-    }
-
     .ai-widget-bubble {
       background: white !important;
       padding: 12px 16px !important;
@@ -164,6 +156,13 @@
       color: white !important;
       border-radius: 16px !important;
       border-top-right-radius: 4px !important;
+    }
+
+    .ai-widget-timestamp {
+      text-align: center !important;
+      color: #6b7280 !important;
+      font-size: 12px !important;
+      margin: 8px 0 !important;
     }
 
     .ai-widget-input {
@@ -293,13 +292,26 @@
         <div class="ai-widget-avatar">
           <img src="${baseUrl}/svarbot-logo.png" alt="AI Support" style="width: 80% !important; height: 80% !important;" />
         </div>
-        <span>AI Support</span>
+        <span>KBHbot</span>
       </div>
-      <button class="ai-widget-close">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      </button>
+      <div class="ai-widget-controls">
+        <button class="ai-widget-button ai-widget-settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="ai-widget-button ai-widget-minimize">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M20 12H4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="ai-widget-button ai-widget-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="ai-widget-messages"></div>
     <div class="ai-widget-input">
@@ -335,28 +347,44 @@
   const textarea = container.querySelector('.ai-widget-textarea');
   const sendButton = container.querySelector('.ai-widget-send');
   const closeButton = container.querySelector('.ai-widget-close');
+  const minimizeButton = container.querySelector('.ai-widget-minimize');
+  const settingsButton = container.querySelector('.ai-widget-settings');
+
+  let isMinimized = false;
+
+  // Format timestamp
+  function formatMessageTime(timestamp, prevTimestamp) {
+    if (!prevTimestamp || Math.abs(timestamp - prevTimestamp) >= 60000) {
+      return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return null;
+  }
 
   // Load chat history
   const chatHistory = loadChatHistory();
-  chatHistory.forEach(message => addMessage(message.text, message.isUser));
+  chatHistory.forEach(message => addMessage(message.text, message.isUser, new Date(message.timestamp)));
 
-  function addMessage(text, isUser = false) {
+  function addMessage(text, isUser = false, timestamp = new Date()) {
+    const prevMessage = chatHistory[chatHistory.length - 1];
+    const timeString = formatMessageTime(timestamp, prevMessage?.timestamp);
+
+    if (timeString) {
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'ai-widget-timestamp';
+      timeDiv.textContent = timeString;
+      messagesContainer.appendChild(timeDiv);
+    }
+
     const message = document.createElement('div');
     message.className = `ai-widget-message ${isUser ? 'user' : ''}`;
     message.innerHTML = `
-      <div class="ai-widget-avatar">
-        ${isUser ? 
-          `<img src="${baseUrl}/chatbutton.png" alt="User" style="width: 80% !important; height: 80% !important;" />` :
-          `<img src="${baseUrl}/svarbot-logo.png" alt="AI" style="width: 80% !important; height: 80% !important;" />`
-        }
-      </div>
       <div class="ai-widget-bubble">${text}</div>
     `;
     messagesContainer.appendChild(message);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     // Save to chat history
-    chatHistory.push({ text, isUser, timestamp: new Date().toISOString() });
+    chatHistory.push({ text, isUser, timestamp: timestamp.toISOString() });
     saveChatHistory(chatHistory);
   }
 
@@ -364,9 +392,6 @@
     const typing = document.createElement('div');
     typing.className = 'ai-widget-typing';
     typing.innerHTML = `
-      <div class="ai-widget-avatar">
-        <img src="${baseUrl}/svarbot-logo.png" alt="AI" style="width: 80% !important; height: 80% !important;" />
-      </div>
       <div class="ai-widget-bubble">
         <div style="display: flex !important; gap: 4px !important;">
           <div class="ai-widget-typing-dot"></div>
@@ -438,15 +463,19 @@
 
   // Toggle widget visibility
   function toggleWidget() {
-    if (container.classList.contains('visible')) {
+    if (isMinimized) {
+      isMinimized = false;
+      container.classList.add('visible');
+    } else if (container.classList.contains('visible')) {
       container.classList.remove('visible');
-      button.innerHTML = `
-        <div style="display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; height: 100% !important;">
-          <img src="${baseUrl}/chatbutton.png" alt="Chat" style="width: 80% !important; height: 80% !important; object-fit: contain !important;" />
-        </div>
-      `;
     } else {
       container.classList.add('visible');
+    }
+    updateToggleButton();
+  }
+
+  function updateToggleButton() {
+    if (container.classList.contains('visible')) {
       button.innerHTML = `
         <div style="display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; height: 100% !important;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white">
@@ -454,11 +483,31 @@
           </svg>
         </div>
       `;
+    } else {
+      button.innerHTML = `
+        <div style="display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; height: 100% !important;">
+          <img src="${baseUrl}/chatbutton.png" alt="Chat" style="width: 80% !important; height: 80% !important; object-fit: contain !important;" />
+        </div>
+      `;
     }
   }
 
   button.addEventListener('click', toggleWidget);
-  closeButton.addEventListener('click', toggleWidget);
+  closeButton.addEventListener('click', () => {
+    container.classList.remove('visible');
+    updateToggleButton();
+  });
+
+  minimizeButton.addEventListener('click', () => {
+    isMinimized = true;
+    container.classList.remove('visible');
+    updateToggleButton();
+  });
+
+  settingsButton.addEventListener('click', () => {
+    // Settings functionality can be added here
+    console.log('Settings clicked');
+  });
 
   // Add button to page
   document.body.appendChild(button);
