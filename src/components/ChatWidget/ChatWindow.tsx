@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IoMdClose, IoMdSend } from 'react-icons/io';
 import { FaRobot } from 'react-icons/fa';
 import { BsPersonCircle } from 'react-icons/bs';
+import { IoSettingsSharp } from 'react-icons/io5';
+import { VscChromeMinimize } from 'react-icons/vsc';
 
 interface Message {
   id: string;
@@ -14,12 +16,14 @@ interface Message {
 interface ChatWindowProps {
   isOpen: boolean;
   onClose: () => void;
+  onMinimize: () => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onMinimize }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -29,6 +33,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const formatMessageTime = (timestamp: Date, prevTimestamp?: Date) => {
+    if (!prevTimestamp || 
+        Math.abs(timestamp.getTime() - prevTimestamp.getTime()) >= 60000) {
+      return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,48 +84,68 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <FaRobot className="w-6 h-6" />
               <div>
-                <h2 className="font-semibold">AI Support</h2>
+                <h2 className="font-semibold">KBHbot</h2>
                 <p className="text-sm text-blue-100">Always here to help</p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-blue-700"
-              aria-label="Close chat"
-            >
-              <IoMdClose className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="text-white hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-blue-700"
+                aria-label="Settings"
+              >
+                <IoSettingsSharp className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onMinimize}
+                className="text-white hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-blue-700"
+                aria-label="Minimize chat"
+              >
+                <VscChromeMinimize className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onClose}
+                className="text-white hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-blue-700"
+                aria-label="Close chat"
+              >
+                <IoMdClose className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.sender === 'user' ? 'justify-end' : 'justify-start'
-                } items-end gap-2`}
-              >
-                {message.sender === 'ai' && (
-                  <FaRobot className="w-6 h-6 text-blue-600" />
-                )}
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.sender === 'user'
-                      ? 'bg-blue-600 text-white rounded-tr-none'
-                      : 'bg-gray-100 text-gray-800 rounded-tl-none'
-                  }`}
-                >
-                  {message.text}
+            {messages.map((message, index) => {
+              const prevMessage = index > 0 ? messages[index - 1] : undefined;
+              const timeString = formatMessageTime(message.timestamp, prevMessage?.timestamp);
+              
+              return (
+                <div key={message.id}>
+                  {timeString && (
+                    <div className="text-center text-sm text-gray-500 my-2">
+                      {timeString}
+                    </div>
+                  )}
+                  <div
+                    className={`flex ${
+                      message.sender === 'user' ? 'justify-end' : 'justify-start'
+                    } items-end gap-2`}
+                  >
+                    <div
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        message.sender === 'user'
+                          ? 'bg-blue-600 text-white rounded-tr-none'
+                          : 'bg-gray-100 text-gray-800 rounded-tl-none'
+                      }`}
+                    >
+                      {message.text}
+                    </div>
+                  </div>
                 </div>
-                {message.sender === 'user' && (
-                  <BsPersonCircle className="w-6 h-6 text-blue-600" />
-                )}
-              </div>
-            ))}
+              );
+            })}
             {isTyping && (
               <div className="flex items-center gap-2">
-                <FaRobot className="w-6 h-6 text-blue-600" />
                 <div className="bg-gray-100 p-3 rounded-lg rounded-tl-none">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
