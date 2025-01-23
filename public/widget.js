@@ -129,6 +129,34 @@
       background: rgba(255, 255, 255, 0.1) !important;
     }
 
+    .ai-widget-send:disabled {
+      background: #93c5fd !important;
+      cursor: not-allowed !important;
+    }
+
+    .ai-widget-typing {
+      display: flex !important;
+      gap: 4px !important;
+      padding: 16px !important;
+      align-items: center !important;
+    }
+
+    .ai-widget-typing-dot {
+      width: 8px !important;
+      height: 8px !important;
+      background: #94a3b8 !important;
+      border-radius: 50% !important;
+      animation: typing 1.4s infinite !important;
+    }
+
+    .ai-widget-typing-dot:nth-child(2) { animation-delay: 0.2s !important; }
+    .ai-widget-typing-dot:nth-child(3) { animation-delay: 0.4s !important; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0) !important; }
+      30% { transform: translateY(-4px) !important; }
+    }
+
     .ai-widget-settings-panel {
       position: absolute !important;
       top: 64px !important;
@@ -300,34 +328,6 @@
 
     .ai-widget-send:hover {
       background: #1d4ed8 !important;
-    }
-
-    .ai-widget-send:disabled {
-      background: #93c5fd !important;
-      cursor: not-allowed !important;
-    }
-
-    .ai-widget-typing {
-      display: flex !important;
-      gap: 4px !important;
-      padding: 16px !important;
-      align-items: center !important;
-    }
-
-    .ai-widget-typing-dot {
-      width: 8px !important;
-      height: 8px !important;
-      background: #94a3b8 !important;
-      border-radius: 50% !important;
-      animation: typing 1.4s infinite !important;
-    }
-
-    .ai-widget-typing-dot:nth-child(2) { animation-delay: 0.2s !important; }
-    .ai-widget-typing-dot:nth-child(3) { animation-delay: 0.4s !important; }
-
-    @keyframes typing {
-      0%, 60%, 100% { transform: translateY(0) !important; }
-      30% { transform: translateY(-4px) !important; }
     }
 
     .ai-widget-toggle {
@@ -643,6 +643,52 @@
           break;
       }
     });
+  });
+
+  // Event listeners
+  textarea.addEventListener('input', () => {
+    sendButton.disabled = !textarea.value.trim();
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = textarea.value.trim();
+    if (!message) return;
+
+    addMessage(message, true);
+    textarea.value = '';
+    textarea.style.height = '44px';
+    sendButton.disabled = true;
+
+    const typing = showTyping();
+
+    try {
+      const response = await fetch('https://incomparable-froyo-d0582a.netlify.app/.netlify/functions/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          message,
+          context: chatHistory.slice(-3) // Send last 3 messages for context
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get response');
+      }
+
+      typing.remove();
+      addMessage(data.response);
+    } catch (error) {
+      typing.remove();
+      addMessage("Beklager, jeg har problemer med at forbinde lige nu. Prøv venligst igen senere.");
+      console.error('Chat error:', error);
+    }
   });
 
   // Add keydown event listener for Enter key
